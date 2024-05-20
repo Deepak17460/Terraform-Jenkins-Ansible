@@ -50,7 +50,7 @@ USER jenkins
 Now we can build the docker image using the following command:
 
 ```shell
-docker build -t samgabrail/jenkins-terraform-docker .
+docker build -t dpcode/jenkins-terraform-docker .
 ```
 
 ### Run Docker Container
@@ -58,7 +58,7 @@ docker build -t samgabrail/jenkins-terraform-docker .
 Now we can run the docker container using the following command:
 
 ```shell
-docker run --name jenkins-terraform -d -v jenkins_home:/var/jenkins_home -p 8080:8080 -p 50000:50000 samgabrail/jenkins-terraform-docker:latest
+docker run --name jenkins-terraform -d -v jenkins_home:/var/jenkins_home -p 8080:8080 -p 50000:50000 dpcode/jenkins-terraform-docker:latest
 ```
 
 ### Configure Jenkins
