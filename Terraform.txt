@@ -1,0 +1,397 @@
+                                                        ***************Terraform-Provisoning*******************
+
+
+*** Puppet is used for both case Infrastruture & Configuration
+
+a-> Infrastructure as code->Infrastructure management as code
+
+1-> Cloudformation
+2-> Pulumi
+3-> Terraform -> Infrastructure management tool or Infrastrcuture provision i.e also known as all in one centralized set of code
+4-> Terraform is used to managed, provision & maintain-> Cloud-Resources
+
+----> Starting
+0-> Variables.tf
+1-> terraform.tfvars
+2-> output.tf
+3-> main.tf
+4-> provider.tf
+5-> HCL-> Hashi-Crop-Line
+
+
+***************Terraform-Commands********************
+
+1-> Terraform show
+2-> Terraform init
+3-> Terraform plan
+4-> Terraform apply
+5-> Terraform refresh
+6-> Terraform destroy
+
+***************Terraform**************
+     ***********Good-To-Great session************
+
+stage("Parameter Setup") {
+      steps {
+        script {
+          properties([
+            parameters([
+              choice(choices: ['apply', 'destroy'], name: 'ACTION')])])
+        }
+      }
+    }
+ 
+    stage("Terraform Init") {
+      steps {
+        script {
+          sh 'terraform init'
+        }
+      }
+    }
+    stage("Terraform Validate") {
+      steps {
+        script {
+          sh 'terraform validate'
+        }
+      }
+    }
+    stage('Terraform Plan') {
+      steps {
+        script {
+          sh 'terraform plan'
+        }
+      }
+    }
+    stage('Terraform Approval') {
+      steps {
+        script {
+          def userInput = input(id: 'confirm', message: 'Approve Terraform ?', parameters: [
+            [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Approve Terraform', name: 'confirm']
+          ])
+        }
+      }
+    }
+    stage('Terraform Action') {
+      steps {
+        script {
+            sh "terraform ${params.ACTION} --auto-approve"
+          //sh "terraform \$ACTION --auto-approve"
+        }
+      }
+    }
+0-> terraform state push errored.tfstate
+1-> sudo chown -R jenkins:jenkins .
+2-> sudo chmod -R u+rwX .
+3-> terraform refresh
+4-> terraform output public_ip_address
+5-> az network public-ip show --name test-pip --resource-group deepakkumar25 --query ipAddress --output tsv
+6-> az network public-ip show --name test-pip --resource-group deepakkumar25 --query ipAddress --output tsv
+7-> ssh -i /root/.ssh/id_rsa azureuser@vm_public_ip_address
+8-> Install a Linux distribution from the Microsoft Store, such as Ubuntu
+
+
+
+1-> Table topic discusiion
+2-> I have seen something inside you, but I don't know where it is & what is that!
+
+3-> Modulation in speech
+i-> Pitch: The highness or lowness of your voice. Changing pitch can express different emotions or highlight important points.
+ii->Tone: The quality or character of your voice. It can reflect the speaker’s feelings and influence the listener’s emotional response.
+iii-> Volume: The loudness or softness of your voice. Adjusting volume can help maintain the audience’s attention and convey the significance of your message.
+iv-> Pace: The speed at which you speak. A varied pace can keep the audience engaged and emphasize the importance of your content.
+
+4-> Right way to take breadth
+5->  emphasize on Noun & ProNoun
+6-> “Let’s eat mother” and “Let’s eat, mother” illustrate the importance of punctuation in changing the meaning of a sentence. Without the comma, “Let’s eat mother” suggests a rather alarming scenario where the mother is being invited to be eaten. However, with the comma, “Let’s eat, mother” becomes a friendly invitation to the mother to join in the meal
+
+
+                                   ************Terraform-Jenkins**************
+
+
+1-> terraform import azurerm_virtual_network.main /subscriptions/e25c0a93-619e-4b0f-8713-ada2c8e89425/resourceGroups/deepakkumar25/providers/Microsoft.Network/virtualNetworks/testnetwork
+
+2-> terraform import azurerm_public_ip.example /subscriptions/e25c0a93-619e-4b0f-8713-ada2c8e89425/resourceGroups/deepakkumar25/providers/Microsoft.Network/publicIPAddresses/test-pip
+
+3-> terraform import azurerm_network_security_group.example /subscriptions/e25c0a93-619e-4b0f-8713-ada2c8e89425/resourceGroups/deepakkumar25/providers/Microsoft.Network/networkSecurityGroups/acceptanceTestSecurityGroup1
+
+4-> terraform import azurerm_resource_group.example /subscriptions/e25c0a93-619e-4b0f-8713-ada2c8e89425/resourceGroups/deepakkumar25
+6-> If the public IP address is visible in the Azure Portal but not showing up in your Terraform outputs, it’s likely due to a synchronization issue between Terraform’s state and the actual state of resources in Azure
+
+
+
+                                   ************************Terraform-Azure-Resource*************
+
+1-> provider "azurerm" {
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+  }
+}
+
+2->
+
+# resource "azurerm_virtual_machine" "main" {
+#   name                  = "dpcode"
+#   location              = azurerm_resource_group.example.location
+#   resource_group_name   = azurerm_resource_group.example.name
+#   network_interface_ids = [azurerm_network_interface.example.id]
+#   vm_size               = "Standard_B2s"
+#   delete_os_disk_on_termination = true
+#   delete_data_disks_on_termination = true
+
+#   storage_image_reference {
+#     publisher = "Canonical"
+#     offer     = "0001-com-ubuntu-server-jammy"
+#     sku       = "22_04-lts"
+#     version   = "latest"
+#   }
+#   storage_os_disk {
+#     name              = "dpcode"
+#     caching           = "ReadWrite"
+#     create_option     = "FromImage"
+#     managed_disk_type = "Standard_LRS"
+#   }
+#   os_profile {
+#     computer_name  = "hostname"
+#     admin_username = "dpcode"
+#     admin_password = "Dpcode@123"
+#   }
+#   os_profile_linux_config {
+#     disable_password_authentication = false
+#   }
+
+1-> networking.tf-> handle networking for configuration
+
+2->
+resource "azurerm_resource_group" "example" {
+  name     = "deepakkumar25"
+  location = "Central India"
+}
+
+resource "azurerm_virtual_network" "main" {
+  name                = "testnetwork"
+  address_space       = ["10.0.0.0/16"]
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
+}
+
+resource "azurerm_subnet" "internal" {
+  name                 = "testinternal-1"
+  resource_group_name  = azurerm_resource_group.example.name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = ["10.0.2.0/24"]
+}
+
+resource "azurerm_public_ip" "example" {
+  name                = "test-pip"
+  resource_group_name = azurerm_resource_group.example.name
+  location            = azurerm_resource_group.example.location
+  allocation_method   = "Dynamic" # To make it static, use "Static"
+  idle_timeout_in_minutes = 30
+}
+
+resource "azurerm_network_interface" "example" {
+  name                = "example-nic-1"
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.internal.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.example.id
+  }
+}
+
+resource "azurerm_network_security_group" "example" {
+  name                = "acceptanceTestSecurityGroup-2"
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
+
+  
+
+  security_rule {
+    name                       = "test123"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+}
+
+resource "azurerm_network_interface_security_group_association" "example" {
+  network_interface_id      = azurerm_network_interface.example.id
+  network_security_group_id = azurerm_network_security_group.example.id
+}
+
+resource "azurerm_virtual_machine" "main" {
+  name                  = "dpcode"
+  location              = azurerm_resource_group.example.location
+  resource_group_name   = azurerm_resource_group.example.name
+  network_interface_ids = [azurerm_network_interface.example.id]
+  vm_size               = "Standard_B2s"
+  delete_os_disk_on_termination = true
+  delete_data_disks_on_termination = true
+
+  os_disk {
+    name                 = "dpcode"
+    caching              = "ReadWrite"
+    create_option        = "FromImage"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
+    version   = "latest"
+  }
+
+  computer_name  = "hostname"
+  admin_username = "azureuser"
+  admin_ssh_key {
+    username   = "azureuser"
+    public_key = file("id_rsa.pub")
+  }
+
+  disable_password_authentication = true
+}
+
+                                            **********************Kuberneted-Kubectl****************
+1-> kubectl get pods
+2-> kubectl get all --all-namespaces
+3-> kubectl create -f <filename>.yaml
+4-> kubectl describe pod <pod-name>
+5-> kubectl edit <resource-type>/<resource-name>
+6-> kubectl exec -it <pod-name> -- <command>
+7-> kubectl port-forward pod/<pod-name> <local-port>:<pod-port>
+8-> kubectl logs <pod-name>
+9-> kubectl apply -f <filename>.yaml
+10->wsl --install -d <DistributionName>
+11->  wsl --list --online 
+12-> kubectl describe pod javaapi-deployment-57db69499b-krsfx
+13-> kubectl logs javaapi-deployment-57db69499b-krsfx
+14-> kubectl apply -f javaapi-deployment.yaml
+15-> kubectl get deployments
+16-> kubectl get pods
+17-> kubectl exec -it javaapi-deployment-57db69499b-krsfx -- /bin/bash
+18-> kubectl logs javaapi-deployment-57db69499b-krsfx
+19-> kubectl port-forward javaapi-deployment-57db69499b-krsfx 8080:8080
+20-> kubectl port-forward <pod-name> <local-port>:<pod-port>
+21-> kubectl apply -f javaapi-service.yaml
+22-> kubectl get nodes -o wide
+23-> kubectl describe service javaapi-service
+24-> minikube service javaapi-service
+25-> kubectl scale deployment javaapi-deployment --replicas=0
+26-> kubectl scale deployment javaapi-deployment --replicas=1
+27-> kubectl delete service javaapi-service
+28-> kubectl delete deployment javaapi-deployment
+
+
+
+*****
+1->  remove-Item .\Terraform-Jenkins-Ansible\ -Recurse -Force
+2-> Podman vs Docker
+$$$$$$$$$$$$$$$$$$$$$$$$$Terraform-Important-Commands***************
+
+                                              ************Terraform-Point****************
+
+
+
+1-> terraform import azurerm_resource_group.example /subscriptions/e25c0a93-619e-4b0f-8713-ada2c8e89425/resourceGroups/deepakkumar25
+2-> terraform init->terraform plan-> terraform apply
+3->  skip_provider_registration = true
+4-> Terraform : https://phoenixnap.com/kb/how-to-install-terraform-centos
+5-> Terraform-Installation : Install | Terraform | HashiCorp Developer
+6-> sudo unzip terraform_1.8.3_linux_amd64.zip -d /usr/local/bin
+7-> wget https://releases.hashicorp.com/terraform/1.8.3/terraform_1.8.3_linux_amd64.zip
+8-> printenv | grep ^TF_VAR*
+9-> az account list -o table --all --query "[].{TenantID: tenantId, Subscription: name, Default: isDefault}"
+10-> az login-> az account show
+11-> cat ~/.ssh/id_rsa.pub
+12-> terraform init
+13-> terraform plan
+14-> terraform apply
+15-> terraform destroy
+11-> Enter-PSSession -ComputerName 4.213.63.144 -Credential (Get-Credential)
+12-> az vm image list --all --output table
+13-> az vm image list --publisher Canonical --offer UbuntuServer --all --output table
+14-> terraform import azurerm_resource_group.example /subscriptions/e25c0a93-619e-4b0f-8713-ada2c8e89425/resourceGroups/deepakkumar25
+15-> Key to search for Terraform : azurerm virtual machine
+1-> variable "subscription_id" {
+  description = "Azure Subscription ID"
+}
+
+variable "client_id" {
+  description = "Azure Client ID"
+}
+
+variable "client_secret" {
+  description = "Azure Client Secret"
+}
+
+variable "tenant_id" {
+  description = "Azure Tenant ID"
+}
+
+provider "azurerm" {
+  features {}
+  subscription_id = var.subscription_id
+  client_id       = var.client_id
+  client_secret   = var.client_secret
+  tenant_id       = var.tenant_id
+  skip_provider_registration = true
+}
+
+resource "azurerm_resource_group" "example" {
+  name     = "deepakkumar25"
+  location = "Central India"
+}
+2->  {
+    "cloudName": "AzureCloud",
+    "homeTenantId": "a45fe71a-f480-4e42-ad5e-aff33165aa35",
+    "id": "e25c0a93-619e-4b0f-8713-ada2c8e89425",
+    "isDefault": true,
+    "managedByTenants": [],
+    "name": "Fresher Trainings",
+    "state": "Enabled",
+    "tenantId": "a45fe71a-f480-4e42-ad5e-aff33165aa35",
+    "user": {
+      "name": "deepak.kumar25@nagarro.com",
+      "type": "user"
+    }
+
+1-> 
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "=3.0.0"
+    }
+  }
+}
+
+provider "azurerm" {
+  features {}
+  subscription_id = ""
+  client_id       = ""
+  client_secret   = ""
+  tenant_id       = ""
+}
+
+
+*********Step-Step*****************
+1-> terraform output public_ip_address --> after this terraform apply
+2-> ssh -i /root/.ssh/id_rsa adminuser@<public_ip_address> ro connect with azure-vm
+3-> chmod 644 /root/.ssh/id_rsa.pub
+
+
+
+
+
+
