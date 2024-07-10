@@ -1,0 +1,34 @@
+---
+- name: Install-Apache
+  hosts: dpcode
+  become: yes
+
+  tasks:
+    - name: Gather-Package-Installtion
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: Install-httpd-package
+      yum:
+        name: httpd
+        state: present
+        update_cache: yes
+      when: "'httpd' not in ansible_facts.packages"
+
+    - name: Apache configuration file
+      template:
+        src: /etc/httpd/conf/httpd.conf
+        dest: /etc/httpd/conf/httpd.conf
+      notify: Restart Apache
+
+    - name: Ensure Apache is running
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+
+  handlers:
+    - name: Restart Apache
+      service:
+        name: httpd
+        state: restarted
